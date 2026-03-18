@@ -213,3 +213,162 @@ Results are saved as JSON under `./results/<model_slug>/`.
     --tasks mme \
     --batch_size 1
   ```
+
+## Vietnamese VLM Benchmark Suite
+
+### Benchmark Availability
+
+| Category | Benchmark | Task Name | Supported |
+|----------|-----------|-----------|-----------|
+| Reading Medical Reports | MMLongBench-Doc | `mmlongbench_doc` | Yes |
+| Reading Medical Reports | DocVQA | `docvqa_val` / `docvqa_test` | Yes |
+| Reading Medical Reports | InfoVQA | `infovqa_val` / `infovqa_test` | Yes |
+| Reading Medical Reports | OCRBench_v2 | `ocrbench_v2` | Yes |
+| Online Images | RealWorldQA | `realworldqa` | Yes |
+| Online Images | MMStar | `mmstar` | Yes |
+| Online Images | VMMU | — | **No** |
+| Online Images | VAIPE-Pill | — | **No** |
+| Online Images | VAIPE-P | — | **No** |
+| Videos | Video-MME | `videomme` | Yes |
+| Videos | MLVU | `mlvu_dev` / `mlvu_test` | Yes |
+| Videos | MVBench | `mvbench` (group, 20 subtasks) | Yes |
+| Videos | VideoMMMU | `video_mmmu` (group) | Yes |
+| Searching | BLINK | `blink` (group, 14 subtasks) | Yes |
+| Searching | Mobile Actions | — | **No** |
+| Searching | HRBench4K | `hrbench4k` | Yes |
+| Searching | HRBench8K | `hrbench8k` | Yes |
+
+**13 out of 17 benchmarks** can be evaluated directly. The 4 unsupported ones (VMMU, VAIPE-Pill, VAIPE-P, Mobile Actions) would require custom task implementations.
+
+### Run All Supported Benchmarks
+
+Replace `MODEL_ID` and `OUTPUT_DIR` as needed. Example uses `Qwen/Qwen3-VL-32B-Instruct`.
+
+```bash
+MODEL_ID="Qwen/Qwen3-VL-32B-Instruct"
+OUTPUT_DIR="./results/qwen3_vl_32b_instruct"
+MODEL_ARGS="pretrained=${MODEL_ID},device_map=auto,attn_implementation=sdpa"
+
+# --- Reading Medical Reports ---
+
+# MMLongBench-Doc
+python -m lmms_eval \
+  --model qwen3_vl \
+  --model_args $MODEL_ARGS \
+  --tasks mmlongbench_doc \
+  --batch_size 1 \
+  --output_path $OUTPUT_DIR
+
+# DocVQA (validation)
+python -m lmms_eval \
+  --model qwen3_vl \
+  --model_args $MODEL_ARGS \
+  --tasks docvqa_val \
+  --batch_size 1 \
+  --output_path $OUTPUT_DIR
+
+# InfoVQA (validation)
+python -m lmms_eval \
+  --model qwen3_vl \
+  --model_args $MODEL_ARGS \
+  --tasks infovqa_val \
+  --batch_size 1 \
+  --output_path $OUTPUT_DIR
+
+# OCRBench v2
+python -m lmms_eval \
+  --model qwen3_vl \
+  --model_args $MODEL_ARGS \
+  --tasks ocrbench_v2 \
+  --batch_size 1 \
+  --output_path $OUTPUT_DIR
+
+# --- Online Images ---
+
+# RealWorldQA
+python -m lmms_eval \
+  --model qwen3_vl \
+  --model_args $MODEL_ARGS \
+  --tasks realworldqa \
+  --batch_size 1 \
+  --output_path $OUTPUT_DIR
+
+# MMStar
+python -m lmms_eval \
+  --model qwen3_vl \
+  --model_args $MODEL_ARGS \
+  --tasks mmstar \
+  --batch_size 1 \
+  --output_path $OUTPUT_DIR
+
+# --- Videos ---
+
+# Video-MME
+python -m lmms_eval \
+  --model qwen3_vl \
+  --model_args $MODEL_ARGS \
+  --tasks videomme \
+  --batch_size 1 \
+  --output_path $OUTPUT_DIR
+
+# MLVU (dev split)
+python -m lmms_eval \
+  --model qwen3_vl \
+  --model_args $MODEL_ARGS \
+  --tasks mlvu_dev \
+  --batch_size 1 \
+  --output_path $OUTPUT_DIR
+
+# MVBench (all 20 subtasks)
+python -m lmms_eval \
+  --model qwen3_vl \
+  --model_args $MODEL_ARGS \
+  --tasks mvbench \
+  --batch_size 1 \
+  --output_path $OUTPUT_DIR
+
+# Video-MMMU (all subtasks)
+python -m lmms_eval \
+  --model qwen3_vl \
+  --model_args $MODEL_ARGS \
+  --tasks video_mmmu \
+  --batch_size 1 \
+  --output_path $OUTPUT_DIR
+
+# --- Searching ---
+
+# BLINK (all 14 subtasks)
+python -m lmms_eval \
+  --model qwen3_vl \
+  --model_args $MODEL_ARGS \
+  --tasks blink \
+  --batch_size 1 \
+  --output_path $OUTPUT_DIR
+
+# HRBench 4K
+python -m lmms_eval \
+  --model qwen3_vl \
+  --model_args $MODEL_ARGS \
+  --tasks hrbench4k \
+  --batch_size 1 \
+  --output_path $OUTPUT_DIR
+
+# HRBench 8K
+python -m lmms_eval \
+  --model qwen3_vl \
+  --model_args $MODEL_ARGS \
+  --tasks hrbench8k \
+  --batch_size 1 \
+  --output_path $OUTPUT_DIR
+```
+
+### One-liner: All 13 Benchmarks at Once
+
+```bash
+python -m lmms_eval \
+  --model qwen3_vl \
+  --model_args pretrained=Qwen/Qwen3-VL-32B-Instruct,device_map=auto,attn_implementation=sdpa \
+  --tasks mmlongbench_doc,docvqa_val,infovqa_val,ocrbench_v2,realworldqa,mmstar,videomme,mlvu_dev,mvbench,video_mmmu,blink,hrbench4k,hrbench8k \
+  --batch_size 1 \
+  --output_path ./results/qwen3_vl_32b_instruct
+```
