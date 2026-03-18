@@ -2,7 +2,6 @@ from collections import defaultdict
 
 from loguru import logger as eval_logger
 
-
 # =============================================================================
 # Pill subset — classify pill labels from image
 # =============================================================================
@@ -13,11 +12,7 @@ def vaipe_pill_doc_to_visual(doc):
 
 
 def vaipe_pill_doc_to_text(doc, lmms_eval_specific_kwargs=None):
-    return (
-        "This is an image of pills. "
-        "Identify all the pill class labels visible in the image. "
-        "Output only the class labels as a comma-separated list of integers in ascending order."
-    )
+    return "This is an image of pills. " "Identify all the pill class labels visible in the image. " "Output only the class labels as a comma-separated list of integers in ascending order."
 
 
 def vaipe_pill_doc_to_target(doc):
@@ -74,11 +69,7 @@ def vaipe_prescription_doc_to_visual(doc):
 
 
 def vaipe_prescription_doc_to_text(doc, lmms_eval_specific_kwargs=None):
-    return (
-        "This is an image of a medical prescription. "
-        "Extract all text annotations from this prescription. "
-        "Output each text entry on a separate line."
-    )
+    return "This is an image of a medical prescription. " "Extract all text annotations from this prescription. " "Output each text entry on a separate line."
 
 
 def vaipe_prescription_doc_to_target(doc):
@@ -127,11 +118,7 @@ def vaipe_pill_pres_map_doc_to_visual(doc):
 
 def vaipe_pill_pres_map_doc_to_text(doc, lmms_eval_specific_kwargs=None):
     pill = doc["pill"]
-    return (
-        f"Given the pill identifier '{pill}', "
-        f"what is the corresponding prescription identifier? "
-        f"Output only the prescription identifier."
-    )
+    return f"Given the pill identifier '{pill}', " f"what is the corresponding prescription identifier? " f"Output only the prescription identifier."
 
 
 def vaipe_pill_pres_map_process_results(doc, results):
