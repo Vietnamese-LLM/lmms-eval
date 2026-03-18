@@ -1,0 +1,10 @@
+dataset_path: anvo25/vmmu
+output_type: generate_until
+doc_to_target: "ground_truth"
+generation_kwargs:
+  max_new_tokens: 128
+  until:
+    - "</s>"
+    - "<|im_end|>"
+metadata:
+  version: 0.0

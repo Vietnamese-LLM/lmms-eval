@@ -1,0 +1,16 @@
+dataset_path: anvo25/vmmu
+task: "vmmu_vn"
+test_split: full_vqa
+doc_to_visual: !function utils.vmmu_doc_to_visual
+doc_to_text: !function utils.vmmu_doc_to_text
+process_results: !function utils.vmmu_process_results
+metric_list:
+  - metric: vmmu_acc
+    aggregation: !function utils.vmmu_aggregate_results
+    higher_is_better: true
+lmms_eval_specific_kwargs:
+  default:
+    language: "vn"
+  qwen3_vl:
+    language: "vn"
+include: _default_template_yaml

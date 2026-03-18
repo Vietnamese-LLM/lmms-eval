@@ -224,21 +224,20 @@ Results are saved as JSON under `./results/<model_slug>/`.
 | Reading Medical Reports | DocVQA | `docvqa_val` / `docvqa_test` | Yes |
 | Reading Medical Reports | InfoVQA | `infovqa_val` / `infovqa_test` | Yes |
 | Reading Medical Reports | OCRBench_v2 | `ocrbench_v2` | Yes |
-| Online Images | RealWorldQA | `realworldqa` | Yes |
-| Online Images | MMStar | `mmstar` | Yes |
-| Online Images | VMMU | — | **No** |
-| Online Images | VAIPE-Pill | — | **No** |
-| Online Images | VAIPE-P | — | **No** |
-| Videos | Video-MME | `videomme` | Yes |
-| Videos | MLVU | `mlvu_dev` / `mlvu_test` | Yes |
-| Videos | MVBench | `mvbench` (group, 20 subtasks) | Yes |
-| Videos | VideoMMMU | `video_mmmu` (group) | Yes |
-| Searching | BLINK | `blink` (group, 14 subtasks) | Yes |
-| Searching | Mobile Actions | — | **No** |
-| Searching | HRBench4K | `hrbench4k` | Yes |
-| Searching | HRBench8K | `hrbench8k` | Yes |
+| Describing & Answering Questions About Online Images | RealWorldQA | `realworldqa` | Yes |
+| Describing & Answering Questions About Online Images | MMStar | `mmstar` | Yes |
+| Describing & Answering Questions About Online Images | VMMU | `vmmu` (EN) / `vmmu_vn` (VN) | Yes |
+| Describing & Answering Questions About Online Images | VAIPE_PILL | `vaipe_pill` / `vaipe_prescription` / `vaipe_pill_pres_map` | Yes |
+| Describing & Answering Questions About Videos | Video-MME | `videomme` | Yes |
+| Describing & Answering Questions About Videos | MLVU | `mlvu_dev` / `mlvu_test` | Yes |
+| Describing & Answering Questions About Videos | MVBench | `mvbench` (group, 20 subtasks) | Yes |
+| Describing & Answering Questions About Videos | VideoMMMU | `video_mmmu` (group) | Yes |
+| Searching Images or Videos | BLINK | `blink` (group, 14 subtasks) | Yes |
+| Searching Images or Videos | Mobile Actions | — | **No** |
+| Searching Images or Videos | HRBench4K | `hrbench4k` | Yes |
+| Searching Images or Videos | HRBench8K | `hrbench8k` | Yes |
 
-**13 out of 17 benchmarks** can be evaluated directly. The 4 unsupported ones (VMMU, VAIPE-Pill, VAIPE-P, Mobile Actions) would require custom task implementations.
+**15 out of 16 benchmarks** can be evaluated directly. The 1 unsupported one (Mobile Actions) would require a custom task implementation.
 
 ### Run All Supported Benchmarks
 
@@ -250,6 +249,7 @@ OUTPUT_DIR="./results/qwen3_vl_32b_instruct"
 MODEL_ARGS="pretrained=${MODEL_ID},device_map=auto,attn_implementation=sdpa"
 
 # --- Reading Medical Reports ---
+
 
 # MMLongBench-Doc
 python -m lmms_eval \
@@ -283,7 +283,23 @@ python -m lmms_eval \
   --batch_size 1 \
   --output_path $OUTPUT_DIR
 
-# --- Online Images ---
+# --- Describing & Answering Questions About Online Images ---
+
+# VMMU (English prompts)
+python -m lmms_eval \
+  --model qwen3_vl \
+  --model_args $MODEL_ARGS \
+  --tasks vmmu \
+  --batch_size 1 \
+  --output_path $OUTPUT_DIR
+
+# VMMU (Vietnamese prompts)
+python -m lmms_eval \
+  --model qwen3_vl \
+  --model_args $MODEL_ARGS \
+  --tasks vmmu_vn \
+  --batch_size 1 \
+  --output_path $OUTPUT_DIR
 
 # RealWorldQA
 python -m lmms_eval \
@@ -301,7 +317,31 @@ python -m lmms_eval \
   --batch_size 1 \
   --output_path $OUTPUT_DIR
 
-# --- Videos ---
+# VAIPE_PILL - Pill classification
+python -m lmms_eval \
+  --model qwen3_vl \
+  --model_args $MODEL_ARGS \
+  --tasks vaipe_pill \
+  --batch_size 1 \
+  --output_path $OUTPUT_DIR
+
+# VAIPE_PILL - Prescription text extraction
+python -m lmms_eval \
+  --model qwen3_vl \
+  --model_args $MODEL_ARGS \
+  --tasks vaipe_prescription \
+  --batch_size 1 \
+  --output_path $OUTPUT_DIR
+
+# VAIPE_PILL - Pill-to-prescription mapping
+python -m lmms_eval \
+  --model qwen3_vl \
+  --model_args $MODEL_ARGS \
+  --tasks vaipe_pill_pres_map \
+  --batch_size 1 \
+  --output_path $OUTPUT_DIR
+
+# --- Describing & Answering Questions About Videos ---
 
 # Video-MME
 python -m lmms_eval \
@@ -335,7 +375,7 @@ python -m lmms_eval \
   --batch_size 1 \
   --output_path $OUTPUT_DIR
 
-# --- Searching ---
+# --- Searching Images or Videos ---
 
 # BLINK (all 14 subtasks)
 python -m lmms_eval \
@@ -362,13 +402,13 @@ python -m lmms_eval \
   --output_path $OUTPUT_DIR
 ```
 
-### One-liner: All 13 Benchmarks at Once
+### One-liner: All 16 Benchmarks at Once
 
 ```bash
 python -m lmms_eval \
   --model qwen3_vl \
   --model_args pretrained=Qwen/Qwen3-VL-32B-Instruct,device_map=auto,attn_implementation=sdpa \
-  --tasks mmlongbench_doc,docvqa_val,infovqa_val,ocrbench_v2,realworldqa,mmstar,videomme,mlvu_dev,mvbench,video_mmmu,blink,hrbench4k,hrbench8k \
+  --tasks mmlongbench_doc,docvqa_val,infovqa_val,ocrbench_v2,vmmu,realworldqa,mmstar,vaipe_pill,vaipe_prescription,vaipe_pill_pres_map,videomme,mlvu_dev,mvbench,video_mmmu,blink,hrbench4k,hrbench8k \
   --batch_size 1 \
   --output_path ./results/qwen3_vl_32b_instruct
 ```

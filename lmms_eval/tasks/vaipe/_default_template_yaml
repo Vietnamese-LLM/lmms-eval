@@ -1,0 +1,9 @@
+dataset_path: Elfsong/VAIPE_PILL
+output_type: generate_until
+generation_kwargs:
+  max_new_tokens: 256
+  until:
+    - "</s>"
+    - "<|im_end|>"
+metadata:
+  version: 0.0
