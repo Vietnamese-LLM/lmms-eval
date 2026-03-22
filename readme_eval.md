@@ -39,7 +39,8 @@ python -m lmms_eval \
   --model_args pretrained=Qwen/Qwen3-VL-32B-Thinking,device_map=auto,attn_implementation=sdpa \
   --tasks mme \
   --batch_size 1 \
-  --limit 8
+  --limit 8 \
+  --gen_kwargs max_new_tokens=4096
 ```
 
 ### Qwen3-VL-32B-Instruct
@@ -187,6 +188,21 @@ done
 
 Results are saved as JSON under `./results/<model_slug>/`.
 
+## Weights & Biases Logging
+
+Add `--wandb_args` to any eval command to log results to W&B. Optionally add `--wandb_log_samples` to also log per-sample outputs.
+
+```bash
+--wandb_args "project=lmms-eval,job_type=eval" \
+--wandb_log_samples
+```
+
+A run name is auto-generated from the model and timestamp if not specified. You can override it:
+
+```bash
+--wandb_args "project=lmms-eval,job_type=eval,name=qwen3-vl-32b-mme"
+```
+
 ## Useful Model Args
 
 | Arg | Default | Description |
@@ -247,6 +263,7 @@ Replace `MODEL_ID` and `OUTPUT_DIR` as needed. Example uses `Qwen/Qwen3-VL-32B-I
 MODEL_ID="Qwen/Qwen3-VL-32B-Instruct"
 OUTPUT_DIR="./results/qwen3_vl_32b_instruct"
 MODEL_ARGS="pretrained=${MODEL_ID},device_map=auto,attn_implementation=sdpa"
+WANDB_ARGS="project=lmms-eval,job_type=eval"
 
 # --- Reading Medical Reports ---
 
@@ -257,7 +274,9 @@ python -m lmms_eval \
   --model_args $MODEL_ARGS \
   --tasks mmlongbench_doc \
   --batch_size 1 \
-  --output_path $OUTPUT_DIR
+  --output_path $OUTPUT_DIR \
+  --wandb_args $WANDB_ARGS \
+  --wandb_log_samples
 
 # DocVQA (validation)
 python -m lmms_eval \
@@ -265,7 +284,9 @@ python -m lmms_eval \
   --model_args $MODEL_ARGS \
   --tasks docvqa_val \
   --batch_size 1 \
-  --output_path $OUTPUT_DIR
+  --output_path $OUTPUT_DIR \
+  --wandb_args $WANDB_ARGS \
+  --wandb_log_samples
 
 # InfoVQA (validation)
 python -m lmms_eval \
@@ -273,7 +294,9 @@ python -m lmms_eval \
   --model_args $MODEL_ARGS \
   --tasks infovqa_val \
   --batch_size 1 \
-  --output_path $OUTPUT_DIR
+  --output_path $OUTPUT_DIR \
+  --wandb_args $WANDB_ARGS \
+  --wandb_log_samples
 
 # OCRBench v2
 python -m lmms_eval \
@@ -281,7 +304,9 @@ python -m lmms_eval \
   --model_args $MODEL_ARGS \
   --tasks ocrbench_v2 \
   --batch_size 1 \
-  --output_path $OUTPUT_DIR
+  --output_path $OUTPUT_DIR \
+  --wandb_args $WANDB_ARGS \
+  --wandb_log_samples
 
 # --- Describing & Answering Questions About Online Images ---
 
@@ -291,7 +316,9 @@ python -m lmms_eval \
   --model_args $MODEL_ARGS \
   --tasks vmmu \
   --batch_size 1 \
-  --output_path $OUTPUT_DIR
+  --output_path $OUTPUT_DIR \
+  --wandb_args $WANDB_ARGS \
+  --wandb_log_samples
 
 # VMMU (Vietnamese prompts)
 python -m lmms_eval \
@@ -299,7 +326,9 @@ python -m lmms_eval \
   --model_args $MODEL_ARGS \
   --tasks vmmu_vn \
   --batch_size 1 \
-  --output_path $OUTPUT_DIR
+  --output_path $OUTPUT_DIR \
+  --wandb_args $WANDB_ARGS \
+  --wandb_log_samples
 
 # RealWorldQA
 python -m lmms_eval \
@@ -307,7 +336,9 @@ python -m lmms_eval \
   --model_args $MODEL_ARGS \
   --tasks realworldqa \
   --batch_size 1 \
-  --output_path $OUTPUT_DIR
+  --output_path $OUTPUT_DIR \
+  --wandb_args $WANDB_ARGS \
+  --wandb_log_samples
 
 # MMStar
 python -m lmms_eval \
@@ -315,7 +346,9 @@ python -m lmms_eval \
   --model_args $MODEL_ARGS \
   --tasks mmstar \
   --batch_size 1 \
-  --output_path $OUTPUT_DIR
+  --output_path $OUTPUT_DIR \
+  --wandb_args $WANDB_ARGS \
+  --wandb_log_samples
 
 # VAIPE_PILL - Pill classification
 python -m lmms_eval \
@@ -323,7 +356,9 @@ python -m lmms_eval \
   --model_args $MODEL_ARGS \
   --tasks vaipe_pill \
   --batch_size 1 \
-  --output_path $OUTPUT_DIR
+  --output_path $OUTPUT_DIR \
+  --wandb_args $WANDB_ARGS \
+  --wandb_log_samples
 
 # VAIPE_PILL - Prescription text extraction
 python -m lmms_eval \
@@ -331,7 +366,9 @@ python -m lmms_eval \
   --model_args $MODEL_ARGS \
   --tasks vaipe_prescription \
   --batch_size 1 \
-  --output_path $OUTPUT_DIR
+  --output_path $OUTPUT_DIR \
+  --wandb_args $WANDB_ARGS \
+  --wandb_log_samples
 
 # VAIPE_PILL - Pill-to-prescription mapping
 python -m lmms_eval \
@@ -339,7 +376,9 @@ python -m lmms_eval \
   --model_args $MODEL_ARGS \
   --tasks vaipe_pill_pres_map \
   --batch_size 1 \
-  --output_path $OUTPUT_DIR
+  --output_path $OUTPUT_DIR \
+  --wandb_args $WANDB_ARGS \
+  --wandb_log_samples
 
 # --- Describing & Answering Questions About Videos ---
 
@@ -349,7 +388,9 @@ python -m lmms_eval \
   --model_args $MODEL_ARGS \
   --tasks videomme \
   --batch_size 1 \
-  --output_path $OUTPUT_DIR
+  --output_path $OUTPUT_DIR \
+  --wandb_args $WANDB_ARGS \
+  --wandb_log_samples
 
 # MLVU (dev split)
 python -m lmms_eval \
@@ -357,7 +398,9 @@ python -m lmms_eval \
   --model_args $MODEL_ARGS \
   --tasks mlvu_dev \
   --batch_size 1 \
-  --output_path $OUTPUT_DIR
+  --output_path $OUTPUT_DIR \
+  --wandb_args $WANDB_ARGS \
+  --wandb_log_samples
 
 # MVBench (all 20 subtasks)
 python -m lmms_eval \
@@ -365,7 +408,9 @@ python -m lmms_eval \
   --model_args $MODEL_ARGS \
   --tasks mvbench \
   --batch_size 1 \
-  --output_path $OUTPUT_DIR
+  --output_path $OUTPUT_DIR \
+  --wandb_args $WANDB_ARGS \
+  --wandb_log_samples
 
 # Video-MMMU (all subtasks)
 python -m lmms_eval \
@@ -373,7 +418,9 @@ python -m lmms_eval \
   --model_args $MODEL_ARGS \
   --tasks video_mmmu \
   --batch_size 1 \
-  --output_path $OUTPUT_DIR
+  --output_path $OUTPUT_DIR \
+  --wandb_args $WANDB_ARGS \
+  --wandb_log_samples
 
 # --- Searching Images or Videos ---
 
@@ -383,7 +430,9 @@ python -m lmms_eval \
   --model_args $MODEL_ARGS \
   --tasks blink \
   --batch_size 1 \
-  --output_path $OUTPUT_DIR
+  --output_path $OUTPUT_DIR \
+  --wandb_args $WANDB_ARGS \
+  --wandb_log_samples
 
 # HRBench 4K
 python -m lmms_eval \
@@ -391,7 +440,9 @@ python -m lmms_eval \
   --model_args $MODEL_ARGS \
   --tasks hrbench4k \
   --batch_size 1 \
-  --output_path $OUTPUT_DIR
+  --output_path $OUTPUT_DIR \
+  --wandb_args $WANDB_ARGS \
+  --wandb_log_samples
 
 # HRBench 8K
 python -m lmms_eval \
@@ -399,7 +450,9 @@ python -m lmms_eval \
   --model_args $MODEL_ARGS \
   --tasks hrbench8k \
   --batch_size 1 \
-  --output_path $OUTPUT_DIR
+  --output_path $OUTPUT_DIR \
+  --wandb_args $WANDB_ARGS \
+  --wandb_log_samples
 ```
 
 ### One-liner: All 16 Benchmarks at Once
@@ -410,5 +463,7 @@ python -m lmms_eval \
   --model_args pretrained=Qwen/Qwen3-VL-32B-Instruct,device_map=auto,attn_implementation=sdpa \
   --tasks mmlongbench_doc,docvqa_val,infovqa_val,ocrbench_v2,vmmu,realworldqa,mmstar,vaipe_pill,vaipe_prescription,vaipe_pill_pres_map,videomme,mlvu_dev,mvbench,video_mmmu,blink,hrbench4k,hrbench8k \
   --batch_size 1 \
-  --output_path ./results/qwen3_vl_32b_instruct
+  --output_path ./results/qwen3_vl_32b_instruct \
+  --wandb_args "project=lmms-eval,job_type=eval" \
+  --wandb_log_samples
 ```
