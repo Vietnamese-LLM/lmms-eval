@@ -1,0 +1,29 @@
+dataset_path: json
+dataset_kwargs:
+  data_files:
+    test: /mnt/sftp/data/duclh11/multimodal/600_safety_test.jsonl
+task: "safety_vn"
+test_split: test
+output_type: generate_until
+generation_kwargs:
+  max_new_tokens: 16
+  temperature: 0
+  top_p: 1.0
+  num_beams: 1
+  do_sample: false
+  until:
+    - "</s>"
+    - "<|im_end|>"
+doc_to_visual: !function utils.safety_doc_to_visual
+doc_to_text: !function utils.safety_doc_to_text
+doc_to_target: "ground_truth"
+process_results: !function utils.safety_process_results
+metric_list:
+  - metric: safety_vn_acc
+    aggregation: !function utils.safety_aggregate_results
+    higher_is_better: true
+  - metric: safety_vn_acc_by_category
+    aggregation: !function utils.safety_aggregate_by_category
+    higher_is_better: true
+metadata:
+  version: 0.0

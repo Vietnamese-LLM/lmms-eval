@@ -10,9 +10,18 @@ from loguru import logger as eval_logger
 from lmms_eval.api.metrics import levenshtein_distance
 
 try:
+    import fitz as pymupdf  # pymupdf
+
+    _HAS_PYMUPDF = True
+except ImportError:
+    _HAS_PYMUPDF = False
+
+try:
     from pdf2image import convert_from_path
 except ImportError:
     convert_from_path = None
+
+_HAS_PDF_RENDERER = _HAS_PYMUPDF or (convert_from_path is not None)
 
 _DATASET_REPO_ID = "yubo2333/MMLongBench-Doc"
 _UNANSWERABLE = "not answerable"
@@ -199,7 +208,7 @@ def _download_pdf(doc_id: str) -> str:
 
 
 def _render_page(doc_id: str, page_number: int):
-    if convert_from_path is None:
+    if not _HAS_PDF_RENDERER:
         return None
 
     cache_key = (doc_id, page_number)
@@ -209,10 +218,22 @@ def _render_page(doc_id: str, page_number: int):
 
     try:
         pdf_path = _download_pdf(doc_id)
-        images = convert_from_path(pdf_path, first_page=page_number, last_page=page_number, dpi=144)
-        if not images:
-            return None
-        page_image = images[0].convert("RGB")
+
+        if _HAS_PYMUPDF:
+            from PIL import Image
+
+            doc = pymupdf.open(pdf_path)
+            # page_number is 1-based, pymupdf uses 0-based
+            page = doc.load_page(page_number - 1)
+            pix = page.get_pixmap(dpi=144)
+            page_image = Image.frombytes("RGB", (pix.width, pix.height), pix.samples)
+            doc.close()
+        else:
+            images = convert_from_path(pdf_path, first_page=page_number, last_page=page_number, dpi=144)
+            if not images:
+                return None
+            page_image = images[0].convert("RGB")
+
         _PAGE_CACHE[cache_key] = page_image
         return page_image.copy()
     except Exception as exc:
@@ -247,9 +268,9 @@ def mmlongbench_doc_to_visual(doc):
     if not pages:
         return []
 
-    if convert_from_path is None:
+    if not _HAS_PDF_RENDERER:
         if not _WARNED_MISSING_PDF_RENDERER:
-            eval_logger.warning("pdf2image is not installed. MMLongBench-Doc will run with text-only prompts.")
+            eval_logger.warning("Neither pymupdf nor pdf2image is installed. MMLongBench-Doc will run with text-only prompts.")
             _WARNED_MISSING_PDF_RENDERER = True
         return []
 

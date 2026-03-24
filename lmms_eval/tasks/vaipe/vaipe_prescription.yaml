@@ -1,7 +1,7 @@
 dataset_path: Elfsong/VAIPE_PILL
 dataset_name: prescription
 task: "vaipe_prescription"
-test_split: test
+test_split: train
 doc_to_visual: !function utils.vaipe_prescription_doc_to_visual
 doc_to_text: !function utils.vaipe_prescription_doc_to_text
 doc_to_target: !function utils.vaipe_prescription_doc_to_target

@@ -1,6 +1,7 @@
 import time
 from typing import List
 
+import torch
 from loguru import logger as eval_logger
 from tqdm import tqdm
 
@@ -20,6 +21,27 @@ if not _has_qwen_vl:
 @register_model("qwen3_vl_chat")
 class Qwen3_VL(Qwen3_VLSimple):
     is_simple = False
+
+    @staticmethod
+    def _expand_video_grid_thw(inputs):
+        """Expand video_grid_thw from per-video [T, H, W] to per-frame [1, H, W] entries.
+
+        The Qwen3-VL processor creates per-frame <|vision_start|>...<|vision_end|>
+        blocks separated by timestamp text tokens. This causes mm_token_type_ids to
+        have one type-2 group per frame. However, video_grid_thw has only one entry
+        per video with shape [T, H, W]. The model's get_rope_index expects one
+        grid_thw entry per type-2 group, so we expand each [T, H, W] into T entries
+        of [1, H, W].
+        """
+        if "video_grid_thw" not in inputs or inputs["video_grid_thw"] is None:
+            return
+        video_grid_thw = inputs["video_grid_thw"]
+        expanded = []
+        for grid in video_grid_thw:
+            t, h, w = grid.tolist()
+            for _ in range(t):
+                expanded.append([1, h, w])
+        inputs["video_grid_thw"] = torch.tensor(expanded, dtype=video_grid_thw.dtype, device=video_grid_thw.device)
 
     def generate_until(self, requests: List[Instance]) -> List[GenerationResult]:
         res = []
@@ -63,10 +85,10 @@ class Qwen3_VL(Qwen3_VLSimple):
             }
             if self.fps is not None:
                 video_kwargs["fps"] = self.fps
-                # limit the number of frames in case fps is set
-                video_kwargs["max_frames"] = self.max_num_frames
-            else:
-                video_kwargs["nframes"] = self.max_num_frames
+            # Use max_frames instead of nframes to avoid errors on short videos
+            # where total frames < max_num_frames. _subsample_video_inputs will
+            # further cap to max_num_frames after loading.
+            video_kwargs["max_frames"] = self.max_num_frames
             batched_messages = [chat_message.to_hf_messages(video_kwargs=video_kwargs) for chat_message in chat_messages]
             texts = self.processor.apply_chat_template(batched_messages, tokenize=False, add_generation_prompt=True)
             image_inputs, video_inputs, video_kwargs_qwen = process_vision_info(
@@ -84,6 +106,7 @@ class Qwen3_VL(Qwen3_VLSimple):
                     list(video_inputs),
                     list(video_metadatas),
                 )
+                self._subsample_video_inputs(video_inputs, video_metadatas)
 
             if self.batch_size > 1:
                 inputs = self.processor(
@@ -107,6 +130,10 @@ class Qwen3_VL(Qwen3_VLSimple):
                     do_resize=False,
                     return_tensors="pt",
                 )
+
+            # Expand video_grid_thw from per-video to per-frame entries to match
+            # the per-frame mm_token_type_ids groups created by the processor.
+            self._expand_video_grid_thw(inputs)
 
             if self.device_map == "auto":
                 inputs = inputs.to("cuda")
