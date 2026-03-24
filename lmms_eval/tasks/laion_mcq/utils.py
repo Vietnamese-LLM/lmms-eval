@@ -1,7 +1,7 @@
 import re
 
-from PIL import Image
 from loguru import logger as eval_logger
+from PIL import Image
 
 
 def laion_doc_to_visual(doc):

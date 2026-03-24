@@ -1,8 +1,8 @@
 import re
 from collections import defaultdict
 
-from PIL import Image
 from loguru import logger as eval_logger
+from PIL import Image
 
 
 def safety_doc_to_visual(doc):
