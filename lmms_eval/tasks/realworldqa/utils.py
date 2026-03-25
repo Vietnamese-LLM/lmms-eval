@@ -1,9 +1,23 @@
 import re
 
+from lmms_eval.api.filter import Filter
+from lmms_eval.api.reasoning import strip_reasoning_tags
 from lmms_eval.filters.extraction import ExtendedRegexFilter
 from lmms_eval.filters.transformation import MapFilter
 
 REPLACE_PROMPT = "Please answer directly with only the letter of the correct option and nothing else."
+
+THINKING_TAG_PAIRS = [["<think>", "</think>"], ["<analysis>", "</analysis>"]]
+
+
+class StripThinkingFilter(Filter):
+    """Strip <think>...</think> and similar reasoning blocks before answer extraction."""
+
+    def __init__(self) -> None:
+        pass
+
+    def apply(self, resps, docs):
+        return [[strip_reasoning_tags(r, THINKING_TAG_PAIRS) for r in inst] for inst in resps]
 
 
 def realworldqa_doc_to_visual(doc):
