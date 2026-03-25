@@ -1,7 +1,7 @@
 dataset_path: json
 dataset_kwargs:
   data_files:
-    test: /mnt/sftp/data/duclh11/multimodal/output_laion_vi.jsonl
+    test: /mnt/sftp/data/multimodal_test_set/annotations/output_laion_vi_sftp.jsonl
 task: "laion_mcq_vi"
 test_split: test
 doc_to_visual: !function utils.laion_doc_to_visual
