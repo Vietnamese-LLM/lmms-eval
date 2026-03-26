@@ -460,12 +460,7 @@ def cli_evaluate(args: Union[argparse.Namespace, None] = None) -> None:
         _run_power_analysis(args)
         sys.exit(0)
 
-    if args.wandb_args:
-        if "name" not in args.wandb_args:
-            name = f"{args.model}_{args.model_args}_{utils.get_datetime_str(timezone=args.timezone)}"
-            name = utils.sanitize_long_string(name)
-            args.wandb_args += f",name={name}"
-        wandb_logger = WandbLogger(**simple_parse_args_string(args.wandb_args))
+    wandb_logger = None
 
     # reset logger
     eval_logger.remove()
@@ -534,11 +529,15 @@ def cli_evaluate(args: Union[argparse.Namespace, None] = None) -> None:
         else:
             is_main_process = False
 
+    if is_main_process and args.wandb_args:
+        if "name" not in args.wandb_args:
+            name = f"{args.model}_{args.model_args}_{utils.get_datetime_str(timezone=args.timezone)}"
+            name = utils.sanitize_long_string(name)
+            args.wandb_args += f",name={name}"
+        wandb_logger = WandbLogger(**simple_parse_args_string(args.wandb_args))
+
     for args in args_list:
         try:
-            # if is_main_process and args.wandb_args:  # thoughtfully we should only init wandb once, instead of multiple ranks to avoid network traffics and unwanted behaviors.
-            #     wandb_logger = WandbLogger()
-
             results, samples = cli_evaluate_single(args)
             results_list.append(results)
 
@@ -546,7 +545,7 @@ def cli_evaluate(args: Union[argparse.Namespace, None] = None) -> None:
                 accelerator.wait_for_everyone()
             elif torch.distributed.is_available() and torch.distributed.is_initialized():
                 torch.distributed.barrier()
-            if is_main_process and args.wandb_args:
+            if wandb_logger is not None:
                 try:
                     wandb_logger.post_init(results)
                     wandb_logger.log_eval_result()
@@ -554,7 +553,6 @@ def cli_evaluate(args: Union[argparse.Namespace, None] = None) -> None:
                         wandb_logger.log_eval_samples(samples)
                 except Exception as e:
                     eval_logger.info(f"Logging to Weights and Biases failed due to {e}")
-                # wandb_logger.finish()
 
         except Exception as e:
             if args.verbosity == "DEBUG":
@@ -573,7 +571,7 @@ def cli_evaluate(args: Union[argparse.Namespace, None] = None) -> None:
             if "groups" in results:
                 print(make_table(results, "groups"))
 
-    if args.wandb_args:
+    if wandb_logger is not None:
         wandb_logger.run.finish()
 
 
