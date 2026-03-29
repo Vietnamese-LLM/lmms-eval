@@ -1,8 +1,28 @@
+import os
 import re
 from collections import defaultdict
 
 from loguru import logger as eval_logger
 from PIL import Image
+
+
+def safety_filter_valid_images(dataset):
+    """Remove samples whose image file is missing, empty, or unreadable."""
+    original_len = len(dataset)
+    dataset = dataset.filter(lambda doc: _is_valid_image(doc["image_path"]))
+    eval_logger.info(f"Safety VN - Filtered {original_len - len(dataset)} bad images, {len(dataset)} samples remaining")
+    return dataset
+
+
+def _is_valid_image(path):
+    try:
+        if not os.path.exists(path) or os.path.getsize(path) == 0:
+            return False
+        with Image.open(path) as img:
+            img.verify()
+        return True
+    except Exception:
+        return False
 
 
 def safety_doc_to_visual(doc):

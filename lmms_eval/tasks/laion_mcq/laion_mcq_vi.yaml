@@ -4,6 +4,7 @@ dataset_kwargs:
     test: /mnt/sftp/data/multimodal_test_set/annotations/output_laion_vi_sftp.jsonl
 task: "laion_mcq_vi"
 test_split: test
+process_docs: !function utils.laion_filter_valid_images
 doc_to_visual: !function utils.laion_doc_to_visual
 doc_to_text: !function utils.laion_doc_to_text
 doc_to_target: "ground_truth"

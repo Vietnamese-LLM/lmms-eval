@@ -4,6 +4,7 @@ dataset_kwargs:
     test: /mnt/sftp/data/multimodal_test_set/annotations/600_safety_test_sftp.jsonl
 task: "safety_vn"
 test_split: test
+process_docs: !function utils.safety_filter_valid_images
 output_type: generate_until
 generation_kwargs:
   max_new_tokens: 16
