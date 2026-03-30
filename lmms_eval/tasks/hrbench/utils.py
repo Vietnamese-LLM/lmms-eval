@@ -7,9 +7,8 @@ from pathlib import Path
 
 import pandas as pd
 import yaml
-from PIL import Image
-
 from loguru import logger as eval_logger
+from PIL import Image
 
 from lmms_eval.tasks.hrbench.hrbench_evals import HRBenchEval
 
