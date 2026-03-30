@@ -20,7 +20,16 @@ from tqdm import tqdm
 # Increase default torch.distributed process group timeout from 30 min to 24 hours.
 # With dp=16 across 2 nodes, workload imbalance causes fast ranks to finish hours
 # before slow ranks (e.g. 1h24m vs 4h24m).  3h was not enough — increase to 24h.
-torch.distributed.distributed_c10d.default_pg_timeout = timedelta(hours=24)
+_PG_TIMEOUT = timedelta(hours=24)
+torch.distributed.distributed_c10d.default_pg_timeout = _PG_TIMEOUT
+
+# torchrun creates the default PG *before* this module is imported, so the
+# default_pg_timeout change above only affects future PGs.  Patch the
+# already-initialised PG so that long-running eval tasks don't hit the
+# default 30-min gloo timeout on all_gather / barrier.
+if torch.distributed.is_initialized():
+    torch.distributed.distributed_c10d._get_default_group().options._timeout = _PG_TIMEOUT
+    eval_logger.info(f"Set default process group timeout to {_PG_TIMEOUT}")
 
 import lmms_eval.api
 import lmms_eval.api.metrics

@@ -9,6 +9,8 @@ import pandas as pd
 import yaml
 from PIL import Image
 
+from loguru import logger as eval_logger
+
 from lmms_eval.tasks.hrbench.hrbench_evals import HRBenchEval
 
 with open(Path(__file__).parent / "hrbench.yaml", "r") as f:
@@ -66,7 +68,10 @@ def hrbench_process_results(doc, results):
     options = hrbench_doc_to_options(doc)
     question = doc["question"]
     resp_dic = hrbench_evaluator.get_chat_response({"question": question, "options": options, "prediction": pred})
-    gpt_prediction = resp_dic["gpt_prediction"]
+    gpt_prediction = resp_dic.get("gpt_prediction")
+    if not gpt_prediction:
+        eval_logger.warning(f"hrbench: GPT eval failed for index {doc.get('index')}, defaulting to wrong answer")
+        gpt_prediction = "Z"
     category = doc["category"]
     cycle_category = doc["cycle_category"]
 
